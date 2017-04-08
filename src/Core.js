@@ -1,13 +1,13 @@
 var ennj = (function (ns) {
     'use strict';
 
-    ns.version = 'ennj 1.0.0a';
+    ns.version = 'ennj 1.1.0a';
 
     ns.main = main;
     ns.start = start;
     ns.stop = stop;
 
-    ns.game = null;
+    ns._game = null;
 
     var glid = 0;
 
@@ -19,14 +19,15 @@ var ennj = (function (ns) {
         secondDelta = 0,
         drawDelta = 0,
         updateRate = 1 / 60,
-        drawRate = 30 / 1,
+        drawRate = 60 / 1,
         ups = 0,
         dps = 0;
 
+    var du = 0,
+        dd = 0;
+
     function requestFrame(callback) {
-        glid = requestAnimationFrame(callback) ||
-            mozRequestAnimationFrame(callback) ||
-            webkitRequestAnimationFrame(callback);
+        glid = requestAnimationFrame(callback);
     }
 
     function cancelFrame(id) {
@@ -34,21 +35,25 @@ var ennj = (function (ns) {
     }
 
     function start() {
-        ns.game.init.call(ns.game);
+        logger.info('Starting game');
+        ns._game.init.call(ns._game);
         requestFrame(loop);
     }
 
     function loop(loopTime) {
         {
-            ns.game.update.call(ns.game, delta);
+            ns._game.update.call(ns._game, delta);
 
             if(drawDelta >= 1 / drawRate) {
                 ctx.clearRect(0, 0, _config.width, _config.height);
                 ctx.fillStyle = '#FFFFFF';
                 ctx.fillRect(0, 0, _config.width, _config.height);
 
-                ns.game.draw.call(ns.game, ctx);
-                ns.game.drawUi.call(ns.game, ctx);
+                ns._game.draw.call(ns._game, ctx);
+                ns._game.drawUi.call(ns._game, ctx);
+
+                ctx.fillStyle = '#FF0000';
+                ctx.fillText('upd '+ du + ' dps ' + dd, 5, 25);
 
                 dps++;
 
@@ -56,7 +61,9 @@ var ennj = (function (ns) {
             }
 
             if(secondDelta >= 1) {
-                ennj.logger.debug('upd', ups, 'dps', dps);
+                // logger.debug('upd', ups, 'dps', dps);
+                du = ups;
+                dd = dps;
                 ups = 0;
                 dps = 0;
                 secondDelta %= 1;
@@ -75,11 +82,21 @@ var ennj = (function (ns) {
     }
 
     function stop() {
+        logger.info('Stopping game');
         cancelFrame(glid);
-        ns.game.destroy.call(ns.game);
+        ns._game.destroy.call(ns._game);
     }
 
-    function main(canvasId, gameModule, loader, config) {
+    function main(canvasId, gameModule, loaderModule, config) {
+        logger.notice(ns.version);
+        logger.notice(navigator.userAgent);
+        logger.notice(navigator.language);
+        logger.notice(navigator.cookieEnabled);
+
+        logger.info('Starting engine');
+
+        preLoadModules();
+
         var canvas = document.getElementById(canvasId);
         ctx = canvas.getContext('2d');
 
@@ -93,18 +110,45 @@ var ennj = (function (ns) {
         canvas.height = config.height;
 
         ctx.imageSmoothingEnabled = false;
-        ctx.mozImageSmoothingEnabled = false;
-        ctx.webkitImageSmoothingEnabled = false;
 
         _config = config;
 
-        ns.game = new (ennj.require(gameModule))();
+        logger.notice('Using game "' + gameModule + '"');
+        logger.notice('Using loader "' + loaderModule + '"');
+
+        ns._game = new (ennj.require(gameModule))();
+
+        ns._loader = new ennj.Loader();
+
+        var loader = ennj.require(loaderModule);
 
         loader.onDone(function() {
             glid = start();
         });
 
-        loader.load();
+        ns._loader.onDone(function() {
+            loader.load();
+        });
+
+        ns._loader.load();
+    }
+
+    function preLoadModules() {
+        var modules = [
+            'ennj.Class',
+            'ennj.Loader',
+            'ennj.Game',
+            'ennj.State',
+            'ennj.Image',
+            'ennj.Input',
+            'ennj.Key',
+            'ennj.Mouse',
+            'ennj.Vector'
+        ];
+
+        for(var i = 0;i < modules.length;i++) {
+            ennj.require(modules[i]);
+        }
     }
 
     return ns;

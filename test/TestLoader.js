@@ -5,7 +5,9 @@ ennj.module('test.TestLoader', ['ennj.Loader'], function(Loader) {
 
     loader.batch({
         image: [
-            'https://dummyimage.com/32x32/000/fff.png'
+            '/res/grass.png',
+            '/res/stone.png',
+            '/res/sand.png'
         ]
     });
 

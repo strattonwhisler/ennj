@@ -4,37 +4,41 @@ var ennj = (function (ns) {
     ns.module = module;
     ns.require = require;
 
-    ns.modules = {};
+    ns._modules = {};
 
-    function module(name, requires, loader, appendNS) {
-        if(!ns.modules[name]) {
-            ns.modules[name] = {
+    function module(name, requires, initializer, appendNS) {
+        if(!ns._modules[name]) {
+            ns._modules[name] = {
                 name: name,
-                loader: loader,
+                initializer: initializer,
                 instance: null,
                 requires: requires,
                 ns: appendNS || false
             };
+            logger.info('Loaded module: "' + name + '"');
         } else {
+            logger.error('Module already exists: "' + name + '"');
             throw 'Module already exists: "' + name + '"';
         }
     }
 
     function require(name) {
-        if(ns.modules[name]) {
-            if(!ns.modules[name].instance) {
+        if(ns._modules[name]) {
+            if(!ns._modules[name].instance) {
                 instantiateModule(name);
             }
-            return ns.modules[name].instance;
+            return ns._modules[name].instance;
         } else {
+            logger.error('Module not found: "' + name + '"');
             throw 'Module not found: "' + name + '"';
         }
     }
 
     function instantiateModule(name) {
-        var module = ns.modules[name];
+        var module = ns._modules[name];
 
         if(module === undefined) {
+            logger.error('Unknown module: "' + name + '"');
             throw 'Unknown module: "' + name + '"';
         }
 
@@ -46,12 +50,12 @@ var ennj = (function (ns) {
 
         for(var i = 0;i < module.requires.length;i++) {
             instantiateModule(module.requires[i]);
-            requires.push(ns.modules[
+            requires.push(ns._modules[
                 module.requires[i]
             ].instance);
         }
 
-        module.instance = module.loader.apply(null, requires);
+        module.instance = module.initializer.apply(ns, requires);
 
         if(module.ns) {
             var parts = module.name.split('.');
@@ -61,7 +65,7 @@ var ennj = (function (ns) {
                 var part = parts[i];
 
                 if(i === parts.length - 1) {
-                    parent[parts[i]] = ns.modules[name].instance;
+                    parent[parts[i]] = ns._modules[name].instance;
                     break;
                 }
 
@@ -72,6 +76,8 @@ var ennj = (function (ns) {
                 parent = parent[part];
             }
         }
+
+        logger.info('Initantiated module: "' + name + '"');
     }
 
     return ns;

@@ -1,31 +1,31 @@
-var ennj = (function(ns) {
+var logger = (function() {
     'use strict';
 
-    ns.logger = {
-        setLevel: setLevel,
-        log: log,
-        debug: debug,
-        info: info,
-        notice: notice,
-        warning: warning,
-        error: error,
-        critical: critical,
-
-        levels: {
+    function Logger() {
+        this.levels = {
             all: Number.MAX_SAFE_INTEGER,
+            none: -1,
             debug: 5,
             info: 4,
             notice: 3,
             warning: 2,
             error: 1,
             critical: 0,
-        }
-    };
+        };
 
-    var logLevel = ns.logger.levels.info;
+        this.level = this.levels.info;
+    }
+
+    Logger.prototype.setLevel = setLevel;
+    Logger.prototype.debug = debug;
+    Logger.prototype.info = info;
+    Logger.prototype.notice = notice;
+    Logger.prototype.warning = warning;
+    Logger.prototype.error = error;
+    Logger.prototype.critical = critical;
 
     function setLevel(level) {
-        logLevel = level;
+        this.level = level;
     }
 
     function getTime() {
@@ -33,8 +33,8 @@ var ennj = (function(ns) {
             text = '';
 
         text += formatNumberLength(time.getFullYear(), 4) + '-';
-        text += formatNumberLength(time.getMonth(), 2) + '-';
-        text += formatNumberLength(time.getDay(), 2) + 'T';
+        text += formatNumberLength(time.getMonth() + 1, 2) + '-';
+        text += formatNumberLength(time.getDate(), 2) + 'T';
 
         text += formatNumberLength(time.getHours(), 2) + ':';
         text += formatNumberLength(time.getMinutes(), 2) + ':';
@@ -60,40 +60,49 @@ var ennj = (function(ns) {
         return text;
     }
 
-    function log(level, parts, style) {
-        if(ns.logger.levels[level] > logLevel) {
+    function log(level, parts, style, fullTrace) {
+        if(this.levels[level] > this.level) {
             return;
         }
 
         var message = parts.join(' '),
-            file = (new Error()).stack.split('\n')[3].split('/').pop().split(':').splice(0, 2).join(':');
+            stack = (new Error()).stack,
+            file = stack.split('\n')[3].split('/').pop().split(':').splice(0, 2).join(':').trim();
 
         console.log('%c' + getTime() + ' [' + formatStringLength(level, 8) + '] [' + file + '] ' + message, style);
+
+        if(fullTrace) {
+            var trace = stack.split('\n');
+            trace.splice(0, 3);
+            for(var row in trace) {
+                console.log('%c    ' + trace[row].trim(), style);
+            }
+        }
     }
 
     function debug() {
-        log('debug', [...arguments], 'color: #00AF00;');
+        log.call(this, 'debug', [...arguments], 'color: #00AF00;');
     }
 
     function info() {
-        log('info', [...arguments], 'color: #3F3F3F;');
+        log.call(this, 'info', [...arguments], 'color: #3F3F3F;');
     }
 
     function notice() {
-        log('notice', [...arguments], 'color: #0000AF;');
+        log.call(this, 'notice', [...arguments], 'color: #0000AF;');
     }
 
     function warning() {
-        log('warning', [...arguments], 'color: #AFAF00;');
+        log.call(this, 'warning', [...arguments], 'color: #AFAF00;');
     }
 
     function error() {
-        log('error', [...arguments], 'color: #AF0000;');
+        log.call(this, 'error', [...arguments], 'color: #AF0000;', true);
     }
 
     function critical() {
-        log('critical', [...arguments], 'color: #AF3F00;');
+        log.call(this, 'critical', [...arguments], 'color: #AF3F00;', true);
     }
 
-    return ns;
-})(ennj || {});
+    return new Logger();
+})(logger || {});

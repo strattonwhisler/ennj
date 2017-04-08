@@ -49,8 +49,8 @@ ennj.module('ennj.Loader', ['ennj.Class'], function(Class) {
     function loadImage(url) {
         var that = this;
 
-        if(ennj.assets[url]) {
-            ennj.assets[url].loaders.push(this.id);
+        if(ennj._assets[url]) {
+            ennj._assets[url].loaders.push(this.id);
             this.loaded++;
             if(this.queued === this.loaded) {
                 this.callback.call(this.callbackScope);
@@ -66,8 +66,15 @@ ennj.module('ennj.Loader', ['ennj.Class'], function(Class) {
                 that.callback.call(that.callbackScope);
             }
         };
+        image.onerror = function() {
+            logger.error('Failed to load image: "' + url + '"');
+            that.loaded++;
+            if(that.queued === that.loaded) {
+                that.callback.call(that.callbackScope);
+            }
+        };
 
-        ennj.assets[url] = {
+        ennj._assets[url] = {
             type: 'image',
             loaders: [this.id],
             value: image
@@ -75,8 +82,12 @@ ennj.module('ennj.Loader', ['ennj.Class'], function(Class) {
     }
 
     function load() {
-        if(!ennj.assets) {
-            ennj.assets = {};
+        if(!ennj._assets) {
+            ennj._assets = {};
+        }
+
+        if(this.queue.length === 0) {
+            this.callback.call(this.callbackScope);
         }
 
         for(var i = 0;i < this.queue.length;i++) {
@@ -92,7 +103,7 @@ ennj.module('ennj.Loader', ['ennj.Class'], function(Class) {
 
     function unload() {
         for(var i = 0;i < this.queue.length;i++) {
-            var asset = ennj.assets[this.queue[i].url];
+            var asset = ennj._assets[this.queue[i].url];
 
             if(!asset) {
                 continue;
@@ -100,7 +111,7 @@ ennj.module('ennj.Loader', ['ennj.Class'], function(Class) {
 
             if(asset.loaders.includes(this.id)) {
                 if(asset.loaders.length === 1) {
-                    delete ennj.assets[this.queue[i].url];
+                    delete ennj._assets[this.queue[i].url];
                 } else {
                     asset.loaders.splice(asset.loaders.indexOf(this.id), 1);
                 }
