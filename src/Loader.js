@@ -5,17 +5,23 @@ ennj.module('ennj.Loader', ['ennj.Class'], function(Class) {
 
     function Loader() {
         this.queued = 0;
-        this.loaded = 0;
+        this.finished = 0;
         this.queue = [];
         this.id = lastId++;
     }
 
     Class.extend(Loader, {
         batch: batch,
-        add: add,
+        addImage: addImage,
+		addSheet: addSheet,
+		addSound: addSound,
+		addMusic: addMusic,
+		addModule: addModule,
+		addJson: addJson,
         load: load,
         unload: unload,
-        onDone: onDone
+        onDone: onDone,
+		onLoad: onLoad
     });
 
     function batch(res) {
@@ -26,24 +32,20 @@ ennj.module('ennj.Loader', ['ennj.Class'], function(Class) {
         }
     }
 
-    function add(type, url) {
-        switch (type) {
-            case 'image':
-            case 'sound':
-            case 'music': {
-                break;
-            }
-            default: {
-                throw 'Unknown asset type "' + type + '"';
-            }
-        }
-
+    function addImage(url) {
         this.queue.push({
-            type: type,
+            type: 'image',
             url: url
         });
 
         this.queued++;
+    }
+
+    function onLoad(url) {
+        that.loaded++;
+        if(that.queued === that.loaded) {
+            that.callback.call(that.callbackScope);
+        }
     }
 
     function loadImage(url) {

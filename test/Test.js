@@ -25,17 +25,23 @@ ennj.module('test.Test', ['ennj.Game', 'ennj.Loader'], function(Game, Loader) {
         // this.img = ennj._assets['https://dummyimage.com/32x32/000/fff.png'].value;
         this._level = ennj.require('test.level.Level1');
 
-        // Arrow Keys
-        ennj.input.bind('up', ennj.Key.UP_ARROW);
-        ennj.input.bind('down', ennj.Key.DOWN_ARROW);
-        ennj.input.bind('left', ennj.Key.LEFT_ARROW);
-        ennj.input.bind('right', ennj.Key.RIGHT_ARROW);
-
         // WASD
         ennj.input.bind('up', ennj.Key.W);
         ennj.input.bind('down', ennj.Key.S);
         ennj.input.bind('left', ennj.Key.A);
         ennj.input.bind('right', ennj.Key.D);
+
+        // // Controller Axis
+        // ennj.input.bind('up', ennj.Joy.axis.LEFT_Y, -1);
+        // ennj.input.bind('down', ennj.Joy.axis.LEFT_Y, 1);
+        // ennj.input.bind('left', ennj.Joy.axis.LEFT_X, -1);
+        // ennj.input.bind('right', ennj.Joy.axis.LEFT_X, 1);
+        //
+        // // Controller D-Pad
+        // ennj.input.bind('up', ennj.Joy.button.D_UP);
+        // ennj.input.bind('down', ennj.Joy.button.D_DOWN);
+        // ennj.input.bind('left', ennj.Joy.button.D_LEFT);
+        // ennj.input.bind('right', ennj.Joy.button.D_RIGHT);
 
         ds = 500 / 8;
     }
@@ -51,10 +57,10 @@ ennj.module('test.Test', ['ennj.Game', 'ennj.Loader'], function(Game, Loader) {
 
         var speed = 200 * delta;
 
-        if(ennj.input.isKeyDown('up')) this._y -= speed;
-        if(ennj.input.isKeyDown('down')) this._y += speed;
-        if(ennj.input.isKeyDown('left')) this._x -= speed;
-        if(ennj.input.isKeyDown('right')) this._x += speed;
+        if(ennj.input.isDown('up')) this._y -= speed;
+        if(ennj.input.isDown('down')) this._y += speed;
+        if(ennj.input.isDown('left')) this._x -= speed;
+        if(ennj.input.isDown('right')) this._x += speed;
 
         // this._x = this._x | 0;
         // this._y = this._y | 0;
@@ -106,7 +112,7 @@ ennj.module('test.Test', ['ennj.Game', 'ennj.Loader'], function(Game, Loader) {
     function drawUi(ctx) {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
         ctx.fillRect(0, 0, 100, 55);
-        ctx.fillStyle = '#FF0000';
+        ctx.fillStyle = '#000000';
         ctx.fillText(ennj.version, 5, 10);
         ctx.fillText(d + '/' + dd, 5, 40);
     }

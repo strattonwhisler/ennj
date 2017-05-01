@@ -81,27 +81,27 @@ var logger = (function() {
     }
 
     function debug() {
-        log.call(this, 'debug', [...arguments], 'color: #00AF00;');
+        log.call(this, 'debug', Array.from(arguments), 'color: #00AF00;');
     }
 
     function info() {
-        log.call(this, 'info', [...arguments], 'color: #3F3F3F;');
+        log.call(this, 'info', Array.from(arguments), 'color: #3F3F3F;');
     }
 
     function notice() {
-        log.call(this, 'notice', [...arguments], 'color: #0000AF;');
+        log.call(this, 'notice', Array.from(arguments), 'color: #0000AF;');
     }
 
     function warning() {
-        log.call(this, 'warning', [...arguments], 'color: #AFAF00;');
+        log.call(this, 'warning', Array.from(arguments), 'color: #AFAF00;');
     }
 
     function error() {
-        log.call(this, 'error', [...arguments], 'color: #AF0000;', true);
+        log.call(this, 'error', Array.from(arguments), 'color: #AF0000;', true);
     }
 
     function critical() {
-        log.call(this, 'critical', [...arguments], 'color: #AF3F00;', true);
+        log.call(this, 'critical', Array.from(arguments), 'color: #AF3F00;', true);
     }
 
     return new Logger();

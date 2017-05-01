@@ -1,0 +1,1 @@
+uglifyjs --compress --mangle --output "build/ennj.js" -- "src/Logger.js" "src/Module.js" "src/Core.js" "src/Class.js" "src/Loader.js" "src/Game.js" "src/State.js" "src/Image.js" "src/Input.js" "src/Key.js" "src/Mouse.js" "src/Joy.js" "src/Vector.js"

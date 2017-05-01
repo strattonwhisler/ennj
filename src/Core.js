@@ -42,6 +42,7 @@ var ennj = (function (ns) {
 
     function loop(loopTime) {
         {
+            // ennj.input.update();
             ns._game.update.call(ns._game, delta);
 
             if(drawDelta >= 1 / drawRate) {
@@ -52,7 +53,7 @@ var ennj = (function (ns) {
                 ns._game.draw.call(ns._game, ctx);
                 ns._game.drawUi.call(ns._game, ctx);
 
-                ctx.fillStyle = '#FF0000';
+                ctx.fillStyle = '#000000';
                 ctx.fillText('upd '+ du + ' dps ' + dd, 5, 25);
 
                 dps++;
@@ -143,6 +144,7 @@ var ennj = (function (ns) {
             'ennj.Input',
             'ennj.Key',
             'ennj.Mouse',
+            'ennj.Joy',
             'ennj.Vector'
         ];
 
