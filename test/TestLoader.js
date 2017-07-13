@@ -4,8 +4,8 @@ ennj.module('test.TestLoader', ['ennj.Loader'], function(Loader) {
     var loader = new Loader();
 
     loader.batch({
-        image: [
-            '/res/terrain.png'
+        sheet: [
+            'res/terrain.png'
         ]
     });
 

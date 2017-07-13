@@ -5,6 +5,7 @@ var logger = (function() {
         this.levels = {
             all: Number.MAX_SAFE_INTEGER,
             none: -1,
+            trace: 6,
             debug: 5,
             info: 4,
             notice: 3,
@@ -17,6 +18,7 @@ var logger = (function() {
     }
 
     Logger.prototype.setLevel = setLevel;
+    Logger.prototype.trace = trace;
     Logger.prototype.debug = debug;
     Logger.prototype.info = info;
     Logger.prototype.notice = notice;
@@ -78,6 +80,10 @@ var logger = (function() {
                 console.log('%c    ' + trace[row].trim(), style);
             }
         }
+    }
+
+    function trace() {
+        log.call(this, 'trace', Array.from(arguments), 'color: #AF00AF;');
     }
 
     function debug() {

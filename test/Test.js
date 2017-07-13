@@ -1,4 +1,4 @@
-ennj.module('test.Test', ['ennj.Game', 'ennj.Loader'], function(Game, Loader) {
+ennj.module('test.Test', ['ennj.Game', 'ennj.Loader', 'ennj.Sheet'], function(Game, Loader, Sheet) {
     'use strict';
 
     function Test() {
@@ -21,9 +21,18 @@ ennj.module('test.Test', ['ennj.Game', 'ennj.Loader'], function(Game, Loader) {
         d,
         dd;
 
+    var dLayers = [];
+
     function init() {
-        // this.img = ennj._assets['https://dummyimage.com/32x32/000/fff.png'].value;
         this._level = ennj.require('test.level.Level1');
+
+        for(var i = 0;i < this._level.layers.length;i++) {
+            if(this._level.layers[i].type === 'draw') {
+                dLayers.push(this._level.layers[i]);
+            }
+        }
+
+        // this._img = new Sheet('res/terrain.png', 32, 32);
 
         // WASD
         ennj.input.bind('up', ennj.Key.W);
@@ -31,30 +40,33 @@ ennj.module('test.Test', ['ennj.Game', 'ennj.Loader'], function(Game, Loader) {
         ennj.input.bind('left', ennj.Key.A);
         ennj.input.bind('right', ennj.Key.D);
 
-        // // Controller Axis
-        // ennj.input.bind('up', ennj.Joy.axis.LEFT_Y, -1);
-        // ennj.input.bind('down', ennj.Joy.axis.LEFT_Y, 1);
-        // ennj.input.bind('left', ennj.Joy.axis.LEFT_X, -1);
-        // ennj.input.bind('right', ennj.Joy.axis.LEFT_X, 1);
-        //
-        // // Controller D-Pad
-        // ennj.input.bind('up', ennj.Joy.button.D_UP);
-        // ennj.input.bind('down', ennj.Joy.button.D_DOWN);
-        // ennj.input.bind('left', ennj.Joy.button.D_LEFT);
-        // ennj.input.bind('right', ennj.Joy.button.D_RIGHT);
+        // Arrow
+        ennj.input.bind('up', ennj.Key.UP_ARROW);
+        ennj.input.bind('down', ennj.Key.DOWN_ARROW);
+        ennj.input.bind('left', ennj.Key.LEFT_ARROW);
+        ennj.input.bind('right', ennj.Key.RIGHT_ARROW);
+
+        // Controller Axis
+        ennj.input.bind('up', ennj.Joy.axis.LEFT_Y, -1);
+        ennj.input.bind('down', ennj.Joy.axis.LEFT_Y, 1);
+        ennj.input.bind('left', ennj.Joy.axis.LEFT_X, -1);
+        ennj.input.bind('right', ennj.Joy.axis.LEFT_X, 1);
+
+        // Controller D-Pad
+        ennj.input.bind('up', ennj.Joy.button.D_UP);
+        ennj.input.bind('down', ennj.Joy.button.D_DOWN);
+        ennj.input.bind('left', ennj.Joy.button.D_LEFT);
+        ennj.input.bind('right', ennj.Joy.button.D_RIGHT);
+
+        ennj.input.bind('skip', ennj.Key.P);
 
         ds = 500 / 8;
     }
 
-    function update(delta) {
-        // this._t += delta * Math.PI;
-        //
-        // this._x = Math.sin(this._t) * 200 + 200;
-        // this._y = Math.cos(this._t) * 200 + 200;
-        //
-        // if(this._t >= Math.PI * 2)
-        //     this._t %= Math.PI * 2;
+    var lastdown = false,
+        skip = 3;
 
+    function update(delta) {
         var speed = 200 * delta;
 
         if(ennj.input.isDown('up')) this._y -= speed;
@@ -62,54 +74,78 @@ ennj.module('test.Test', ['ennj.Game', 'ennj.Loader'], function(Game, Loader) {
         if(ennj.input.isDown('left')) this._x -= speed;
         if(ennj.input.isDown('right')) this._x += speed;
 
-        // this._x = this._x | 0;
-        // this._y = this._y | 0;
+        if(ennj.input.isDown('skip') && !lastdown) {
+            skip++;
+            skip %= 4;
+            lastdown = true;
+        }
+        if(!ennj.input.isDown('skip')) {
+            lastdown = false;
+        }
     }
 
     function draw(ctx) {
-        // ctx.drawImage(this.img, 0, 0, 128, 128);
-
-        var data = this._level.layers[0].data,
-            map = this._level.layers[0].map,
-            width = this._level.layers[0].width,
-            height = this._level.layers[0].height;
-
-        var startX = Math.floor(-this._x / ds),
-            startY = Math.floor(-this._y / ds),
-            endX = startX + 14,
-            endY = startY + 9;
-
-        dd = width * height;
+        var rootMap = this._level.map;
 
         d = 0;
+        dd = 0;
 
-        for(var y = startY;y < endY;y++) {
-            for(var x = startX;x < endX;x++) {
-                if(x < 0 || y < 0 || x > width - 1 || y > height - 1) {
-                    continue;
+        for(var lay = 0;lay < dLayers.length;lay++) {
+            if(lay === skip) {
+                continue;
+            }
+
+            var data = dLayers[lay].data,
+                map = rootMap.concat(dLayers[lay].map),
+                width = dLayers[lay].width,
+                height = dLayers[lay].height;
+
+            var startX = Math.floor(-this._x / ds),
+                startY = Math.floor(-this._y / ds),
+                endX = startX + 14,
+                endY = startY + 9;
+
+            dd += width * height;
+
+            for(var y = startY;y < endY;y++) {
+                for(var x = startX;x < endX;x++) {
+                    if(x < 0 || y < 0 || x > width - 1 || y > height - 1) {
+                        continue;
+                    }
+
+                    var id = data[y][x];
+
+                    if(id === 0) {
+                        continue;
+                    }
+
+                    var range = null,
+                        start = 0;
+                    for(var i = 0;i < map.length;i++) {
+                        if(id >= start && id < start + map[i].range) {
+                            range = map[i];
+                            break;
+                        }
+                        start += map[i].range
+                    }
+
+                    if(!range) {
+                        logger.warning('Could not resolve id "' + id + '" from map');
+                        break;
+                    }
+
+                    range.image.draw(ctx, (x * ds) + this._x, (y * ds) + this._y, id - start, ds);
+                    d++;
                 }
-
-                var id = data[y][x];
-
-                var image;
-                if(map[id] === '/res/grass.png') {
-                    image = ennj._assets['/res/grass.png'].value;
-                } else if(map[id] === '/res/stone.png') {
-                    image = ennj._assets['/res/stone.png'].value;
-                } else if(map[id] === '/res/sand.png') {
-                    image = ennj._assets['/res/sand.png'].value;
-                } else {
-                    logger.error('Unknown level data id: "' + id + '"');
-                    continue;
-                }
-
-                ctx.drawImage(image, (x * ds) + this._x, (y * ds) + this._y, ds, ds);
-                d++;
             }
         }
     }
 
     function drawUi(ctx) {
+        // Night Hack
+        // ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        // ctx.fillRect(0, 0, 800, 500);
+
         ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
         ctx.fillRect(0, 0, 100, 55);
         ctx.fillStyle = '#000000';

@@ -124,7 +124,7 @@ ennj.module('ennj.Key', [], function() {
         GRAVE:              'Backquote',
         OPEN_BRACKET:       'BracketLeft',
         BACK_SLASH:         'Backslash',
-        CLOSE_BRAKET:       'BrackRight',
+        CLOSE_BRACKET:       'BracketRight',
         SINGLE_QUOTE:       'Quote',
         PRINT:              'PrintScreen'
     };

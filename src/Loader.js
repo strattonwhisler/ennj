@@ -1,23 +1,21 @@
-ennj.module('ennj.Loader', ['ennj.Class'], function(Class) {
+ennj.module('ennj.Loader', ['ennj.Class', 'ennj.Image', 'ennj.Sheet'], function(Class, Image, Sheet) {
     'use strict';
-
-    var lastId = 0;
 
     function Loader() {
         this.queued = 0;
-        this.finished = 0;
+        this.loaded = 0;
         this.queue = [];
-        this.id = lastId++;
+        this.id = ennj.uuidv4();
     }
 
     Class.extend(Loader, {
         batch: batch,
         addImage: addImage,
 		addSheet: addSheet,
-		addSound: addSound,
-		addMusic: addMusic,
-		addModule: addModule,
-		addJson: addJson,
+		// addSound: addSound,
+		// addMusic: addMusic,
+		// addModule: addModule,
+		// addJson: addJson,
         load: load,
         unload: unload,
         onDone: onDone,
@@ -27,7 +25,12 @@ ennj.module('ennj.Loader', ['ennj.Class'], function(Class) {
     function batch(res) {
         for(var key in res) {
             for(var i = 0;i < res[key].length;i++) {
-                add.call(this, key, res[key][i]);
+                this.queue.push({
+                    type: key,
+                    url: res[key][i]
+                });
+
+                this.queued++;
             }
         }
     }
@@ -41,64 +44,99 @@ ennj.module('ennj.Loader', ['ennj.Class'], function(Class) {
         this.queued++;
     }
 
-    function onLoad(url) {
-        that.loaded++;
-        if(that.queued === that.loaded) {
-            that.callback.call(that.callbackScope);
-        }
+    function addSheet(url) {
+        this.queue.push({
+            type: 'sheet',
+            url: url
+        });
+
+        this.queued++;
     }
 
-    function loadImage(url) {
-        var that = this;
-
+    function checkAsset(url) {
         if(ennj._assets[url]) {
             ennj._assets[url].loaders.push(this.id);
             this.loaded++;
             if(this.queued === this.loaded) {
                 this.callback.call(this.callbackScope);
             }
+            return true;
+        }
+        return false;
+    }
+
+    function successCallback() {
+        this.loaded++;
+        if(this.queued === this.loaded) {
+            this.callback.call(this.callbackScope);
+        }
+    }
+
+    function errorCallback(type) {
+        logger.error('Failed to load ' + type + ': "' + url + '"');
+        this.loaded++;
+        if(this.queued === this.loaded) {
+            this.callback.call(this.callbackScope);
+        }
+    }
+
+    function loadImage(url) {
+        var that = this;
+
+        if(checkAsset.call(this, url)) {
             return;
         }
 
-        var image = new Image();
-        image.src = url;
-        image.onload = function () {
-            that.loaded++;
-            if(that.queued === that.loaded) {
-                that.callback.call(that.callbackScope);
-            }
-        };
-        image.onerror = function() {
-            logger.error('Failed to load image: "' + url + '"');
-            that.loaded++;
-            if(that.queued === that.loaded) {
-                that.callback.call(that.callbackScope);
-            }
-        };
+        Image.load.call({
+            url: url,
+            id: this.id
+        }, function() {
+            successCallback.call(that);
+        }, function() {
+            errorCallback.call(that, 'image');
+        });
+    }
 
-        ennj._assets[url] = {
-            type: 'image',
-            loaders: [this.id],
-            value: image
-        };
+    function loadSheet(url) {
+        var that = this;
+
+        if(checkAsset.call(this, url)) {
+            return;
+        }
+
+        Sheet.load.call({
+            url: url,
+            id: this.id
+        }, function() {
+            successCallback.call(that);
+        }, function() {
+            errorCallback.call(that, 'sheet');
+        });
     }
 
     function load() {
-        if(!ennj._assets) {
-            ennj._assets = {};
-        }
-
         if(this.queue.length === 0) {
             this.callback.call(this.callbackScope);
         }
 
         for(var i = 0;i < this.queue.length;i++) {
-            if(this.queue[i].type === 'image') {
-                loadImage.call(this, this.queue[i].url);
-            } else if(this.queue[i].type === 'sound') {
-                // loadSound.call(this, this.queue[i].url);
-            } else if(this.queue[i].type === 'music') {
-                // loadMusic.call(this, this.queue[i].url);
+            switch(this.queue[i].type) {
+                case 'image':
+                    loadImage.call(this, this.queue[i].url);
+                    break;
+                case 'sheet':
+                    loadSheet.call(this, this.queue[i].url);
+                    break;
+                case 'sound':
+                    // loadSound.call(this, this.queue[i].url);
+                    break;
+                case 'music':
+                    // loadMusic.call(this, this.queue[i].url);
+                    break;
+                default:
+                    logger.error('Unknown asset type "' +
+                        this.queue[i].type + '" for "' +
+                        this.queue[i].url + '"');
             }
         }
     }

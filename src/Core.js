@@ -7,12 +7,9 @@ var ennj = (function (ns) {
     ns.start = start;
     ns.stop = stop;
 
-    ns._game = null;
-
     var glid = 0;
 
-    var ctx,
-        _config;
+    var ctx;
 
     var startTime = 0,
         delta = 0,
@@ -42,13 +39,13 @@ var ennj = (function (ns) {
 
     function loop(loopTime) {
         {
-            // ennj.input.update();
+            ennj.input.poll();
             ns._game.update.call(ns._game, delta);
 
             if(drawDelta >= 1 / drawRate) {
-                ctx.clearRect(0, 0, _config.width, _config.height);
+                ctx.clearRect(0, 0, ns._config.width, ns._config.height);
                 ctx.fillStyle = '#FFFFFF';
-                ctx.fillRect(0, 0, _config.width, _config.height);
+                ctx.fillRect(0, 0, ns._config.width, ns._config.height);
 
                 ns._game.draw.call(ns._game, ctx);
                 ns._game.drawUi.call(ns._game, ctx);
@@ -89,46 +86,39 @@ var ennj = (function (ns) {
     }
 
     function main(canvasId, gameModule, loaderModule, config) {
-        logger.notice(ns.version);
-        logger.notice(navigator.userAgent);
-        logger.notice(navigator.language);
-        logger.notice(navigator.cookieEnabled);
+        logger.notice('Version ', ns.version);
+        logger.notice('Agent   ', navigator.userAgent);
+        logger.notice('Language', navigator.language);
+        logger.notice('Cookies ', navigator.cookieEnabled);
 
         logger.info('Starting engine');
 
         preLoadModules();
 
+        ns._config = config || {};
+        // TODO: Add default config
+
         var canvas = document.getElementById(canvasId);
         ctx = canvas.getContext('2d');
-
-        if(!config) {
-            config = {};
-            config.width = 800;
-            config.height = 500;
-        }
 
         canvas.width = config.width;
         canvas.height = config.height;
 
         ctx.imageSmoothingEnabled = false;
 
-        _config = config;
-
         logger.notice('Using game "' + gameModule + '"');
         logger.notice('Using loader "' + loaderModule + '"');
 
+        ns._assets = {};
+
+        ns.input = new (ennj.require('ennj.Input'))();
+
         ns._game = new (ennj.require(gameModule))();
 
-        ns._loader = new ennj.Loader();
-
-        var loader = ennj.require(loaderModule);
-
-        loader.onDone(function() {
-            glid = start();
-        });
+        ns._loader = ennj.require(loaderModule);
 
         ns._loader.onDone(function() {
-            loader.load();
+            glid = start();
         });
 
         ns._loader.load();
@@ -141,6 +131,7 @@ var ennj = (function (ns) {
             'ennj.Game',
             'ennj.State',
             'ennj.Image',
+            'ennj.Sheet',
             'ennj.Input',
             'ennj.Key',
             'ennj.Mouse',
