@@ -1,0 +1,19 @@
+{
+    "name": "ennj",
+    "version": "1.0.0",
+    "description": "A 2D game engine using Canvas and Typescript",
+    "main": "index.js",
+    "repository": "git@github.com:inventer99/ennj.git",
+    "author": "Stratton Whisler",
+    "license": "MIT",
+    "scripts": {
+        "build": "webpack",
+        "build-watch": "webpack --watch"
+    },
+    "devDependencies": {
+        "json-loader": "^0.5.4",
+        "ts-loader": "^2.2.2",
+        "typescript": "^2.4.1",
+        "webpack": "^3.2.0"
+    }
+}
