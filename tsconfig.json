@@ -3,14 +3,14 @@
         "outDir": "./dist/",
         "sourceMap": true,
         "noImplicitAny": true,
-        "module": "commonjs",
-        "target": "es5",
-        "lib": [
-            "ES5",
-            "ES2015",
-            "DOM"
-        ],
-        "allowJs": true
+        "module": "ES6",
+        "target": "ES2017",
+        "allowJs": true,
+        "experimentalDecorators": true,
+        "baseUrl": "",
+        "paths": {
+            "ennj/*": [ "src/*" ]
+        }
     },
     "compileOnSave": false
 }

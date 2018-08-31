@@ -11,7 +11,12 @@ export enum LogLevel {
 }
 
 export class Logger {
-    constructor(private level: LogLevel = LogLevel.INFO) {
+    private level: LogLevel;
+    private file: string;
+
+    constructor(level: LogLevel = LogLevel.INFO, file: string = null) {
+        this.level = level;
+        this.file = file;
     }
 
     public setLevel(level: LogLevel) {
@@ -22,44 +27,32 @@ export class Logger {
         let time = new Date();
         let text = '';
 
-        text += this.formatNumberLength(time.getFullYear(), 4) + '-';
-        text += this.formatNumberLength(time.getMonth() + 1, 2) + '-';
-        text += this.formatNumberLength(time.getDate(), 2) + 'T';
+        text += time.getFullYear().toString().padStart(4, '0') + '-';
+        text += (time.getMonth() + 1).toString().padStart(2, '0') + '-';
+        text += time.getDate().toString().padStart(2, '0') + 'T';
 
-        text += this.formatNumberLength(time.getHours(), 2) + ':';
-        text += this.formatNumberLength(time.getMinutes(), 2) + ':';
-        text += this.formatNumberLength(time.getSeconds(), 2) + '.';
-        text += this.formatNumberLength(time.getMilliseconds(), 3);
+        text += time.getHours().toString().padStart(2, '0') + ':';
+        text += time.getMinutes().toString().padStart(2, '0') + ':';
+        text += time.getSeconds().toString().padStart(2, '0') + '.';
+        text += time.getMilliseconds().toString().padStart(3, '0');
 
         return text;
     }
 
-    private formatNumberLength(value: number, length: number): string {
-        let text = '' + value;
-        while (text.length < length) {
-            text = '0' + text;
-        }
-        return text;
-    }
-
-    private formatStringLength(value: string, length: number): string {
-        var text = '' + value;
-        while (text.length < length) {
-            text += ' ';
-        }
-        return text;
-    }
-
-    private log(level: LogLevel, parts: Array<any>, style: string, fullTrace: boolean = false): void {
+    public log(level: LogLevel, parts: Array<any>, style: string, fullTrace: boolean = false): void {
         if(level > this.level) {
             return;
         }
 
         let message = parts.join(' ');
         let stack = (new Error()).stack;
-        let file = stack.split('\n')[3].split('/').pop().split(':').splice(0, 2).join(':').trim();
 
-        console.log('%c' + this.getTime() + ' [' + this.formatStringLength(LogLevel[level], 8) + '] [' + file + '] ' + message, style);
+        let file = this.file;
+        if(!file) {
+            file = stack.split('\n')[3].split('/').pop().split(':').splice(0, 2).join(':').trim();
+        }
+
+        console.log('%c' + this.getTime() + ' [' + LogLevel[level].padEnd(8) + '] [' + file + '] ' + message, style);
 
         if(fullTrace) {
             let trace = stack.split('\n');

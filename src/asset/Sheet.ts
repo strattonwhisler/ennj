@@ -1,5 +1,5 @@
-import { Asset } from './Asset';
-import logger from './Logger';
+import { Asset } from 'ennj/asset/Asset';
+import logger from 'ennj/util/Logger';
 
 export class Sheet extends Asset {
     private image: HTMLImageElement;

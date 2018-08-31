@@ -1,4 +1,4 @@
-import { main, Loader, logger } from '../src';
+import { main, Loader, Matrix } from '../src';
 import { Test } from './Test';
 
 window.onload = () => {

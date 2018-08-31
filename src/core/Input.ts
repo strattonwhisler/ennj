@@ -1,4 +1,4 @@
-import logger from './Logger';
+import logger from 'ennj/util/Logger';
 
 export enum Key {
     // Editing

@@ -1,11 +1,11 @@
-import { uuid, uuidv4 } from './UUID';
-import { Asset } from './Asset';
-import { Image } from './Image';
-import { Sheet } from './Sheet';
-import { Sound } from './Sound';
-import { Music } from './Music';
-import { Json } from './Json';
-import logger from './Logger';
+import { uuid, uuidv4 } from 'ennj/util/UUID';
+import { Asset } from 'ennj/asset/Asset';
+import { Image } from 'ennj/asset/Image';
+import { Sheet } from 'ennj/asset/Sheet';
+import { Sound } from 'ennj/asset/Sound';
+import { Music } from 'ennj/asset/Music';
+import { Json } from 'ennj/asset/Json';
+import logger from 'ennj/util/Logger';
 
 export class Loader {
     public readonly id: uuid = uuidv4();
@@ -24,40 +24,39 @@ export class Loader {
         };
     }
 
-    private loadAsset(asset: {type: string, url: string}): Promise<Asset> {
+    private async loadAsset(asset: {type: string, url: string}): Promise<Asset> {
         if(Loader.cache[asset.url]) {
             logger.trace(`Loading asset from cache "${asset.url}"`);
             Loader.cache[asset.url].loaders.push(this.id);
-            this.loaded++;
-            return Promise.resolve(Loader.cache[asset.url].asset);
+            return Loader.cache[asset.url].asset;
         }
 
         switch(asset.type) {
             case 'image':
-                return Image.load(asset.url)
-                    .then((asset) => { this.loaded++; this.cacheAsset(asset); return asset; });
+                return Image.load(asset.url);
             case 'sheet':
-                return Sheet.load(asset.url)
-                    .then((asset) => { this.loaded++; this.cacheAsset(asset); return asset; });
+                return Sheet.load(asset.url);
             case 'sound':
-                return Sound.load(asset.url)
-                    .then((asset) => { this.loaded++; this.cacheAsset(asset); return asset; });
+                return Sound.load(asset.url);
             case 'music':
-                return Music.load(asset.url)
-                    .then((asset) => { this.loaded++; this.cacheAsset(asset); return asset; });
+                return Music.load(asset.url);
             case 'json':
-                return Json.load(asset.url)
-                    .then((asset) => { this.loaded++; this.cacheAsset(asset); return asset; });
+                return Json.load(asset.url);
             default:
                 const err = `Unknown asset type "${asset.type}" for "${asset.url}"`;
                 logger.error(err);
-                return Promise.reject(err);
+                throw Error(err);
         }
     }
 
-    public load(): Promise<Asset[]> {
+    public async load(): Promise<Asset[]> {
         logger.trace(`Loading assets for loader "${this.id}"`);
-        return Promise.all(this.queue.map(asset => this.loadAsset(asset)));
+        return Promise.all(this.queue.map(async (asset) => {
+            const data = this.loadAsset(asset);
+            this.cacheAsset(await data);
+            this.loaded++;
+            return data;
+        }));
     }
 
     public unload(): void {

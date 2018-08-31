@@ -1,6 +1,6 @@
-import { Asset } from './Asset';
-import { Loader } from './Loader';
-import logger from './Logger';
+import { Asset } from 'ennj/asset/Asset';
+import { Loader } from 'ennj/asset/Loader';
+import logger from 'ennj/util/Logger';
 
 export class Image extends Asset {
     private image: HTMLImageElement;
@@ -29,7 +29,7 @@ export class Image extends Asset {
             image.onerror = () => {
                 const err = `Filed to load image "${url}"`;
                 logger.error(err);
-                reject(err);
+                reject(Error(err));
             };
         });
     }

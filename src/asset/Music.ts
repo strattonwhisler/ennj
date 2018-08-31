@@ -1,7 +1,7 @@
-import { Asset } from './Asset';
-import logger from './Logger';
+import { Asset } from 'ennj/asset/Asset';
+import logger from 'ennj/util/Logger';
 
-export class Sound extends Asset {
+export class Music extends Asset {
     private audio: HTMLAudioElement;
 
     constructor(url: string, audio: HTMLAudioElement) {
@@ -9,18 +9,18 @@ export class Sound extends Asset {
 
         this.audio = audio;
 
-        logger.warning('Sound type is unimplemented');
+        logger.warning('Music type is unimplemented');
     }
 
-    static load(url: string): Promise<Sound> {
-        return new Promise<Sound>((resolve, reject) => {
+    static load(url: string): Promise<Music> {
+        return new Promise<Music>((resolve, reject) => {
             const audio = document.createElement('audio');
             audio.src = url;
             audio.onload = () => {
-                resolve(new Sound(url, audio));
+                resolve(new Music(url, audio));
             };
             audio.onerror = () => {
-                const err = `Filed to load sound "${url}"`;
+                const err = `Filed to load music "${url}"`;
                 logger.error(err);
                 reject(err);
             };

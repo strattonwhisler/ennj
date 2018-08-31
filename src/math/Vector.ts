@@ -1,14 +1,19 @@
 export class Vector {
-    constructor(public x: number = 0, public y: number = 0) {
+    public x: number;
+    public y: number;
+
+    constructor(x: number = 0, y: number = 0) {
+        this.x = x;
+        this.y = y
     }
 
-    public add(v: Vector): this {
+    public add(v: this): this {
         this.x += v.x;
         this.y += v.y;
         return this;
     }
 
-    public sub(v: Vector): this {
+    public sub(v: this): this {
         this.x -= v.x;
         this.y -= v.y;
         return this;
@@ -26,7 +31,7 @@ export class Vector {
         return this;
     }
 
-    public dot(v: Vector): number {
+    public dot(v: this): number {
         return (this.x * v.x) + (this.y * v.y);
     }
 
