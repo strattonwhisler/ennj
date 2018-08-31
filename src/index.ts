@@ -14,6 +14,9 @@ export * from 'ennj/asset/Sound';
 export * from 'ennj/asset/Music';
 export * from 'ennj/asset/Json';
 
+// Scene
+export * from 'ennj/scene/Node';
+
 // Math
 export * from 'ennj/math/Vector';
 export * from 'ennj/math/Matrix';

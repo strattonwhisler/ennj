@@ -2,8 +2,12 @@
 
 precision mediump float;
 
+in vec2 v_textureCoord;
+
+uniform sampler2D u_texture;
+
 out vec4 color;
 
 void main() {
-    color = vec4(1.0, 1.0, 1.0, 1.0);
+    color = texture(u_texture, v_textureCoord);
 }

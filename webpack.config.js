@@ -1,7 +1,5 @@
 const path = require('path');
 
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
-
 module.exports = {
     context: __dirname,
     node: {
@@ -26,13 +24,6 @@ module.exports = {
             ennj: path.join(__dirname, 'src')
         },
     },
-    plugins: [
-        // new UglifyJSPlugin({
-        //     uglifyOptions: {
-        //         ecma: 6
-        //     }
-        // })
-    ],
     output: {
         filename: '[name].bundle.js',
         path: path.resolve(__dirname, 'dist')

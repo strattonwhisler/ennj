@@ -12,5 +12,21 @@ window.onload = () => {
 
     const game = new Test();
 
-    main('canvas', game, loader, config);
+    let engine = main('canvas', game, loader, config);
+
+    // Play / Stop
+    let playing = true;
+    const play = document.createElement('button');
+    play.innerHTML = 'Stop';
+    play.onclick = () => {
+        if(playing) {
+            play.innerHTML = 'Play';
+            engine.stop();
+        } else {
+            play.innerHTML = 'Stop';
+            engine = main('canvas', game, loader, config);
+        }
+        playing = !playing;
+    };
+    document.body.appendChild(play);
 };

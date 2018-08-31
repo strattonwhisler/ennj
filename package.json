@@ -8,9 +8,10 @@
     "license": "MIT",
     "scripts": {
         "build": "webpack",
-        "build-watch": "webpack --watch"
+        "build:watch": "webpack --watch"
     },
     "devDependencies": {
+        "express": "^4.16.3",
         "json-loader": "^0.5.4",
         "ts-loader": "^2.2.2",
         "typescript": "^2.4.1",

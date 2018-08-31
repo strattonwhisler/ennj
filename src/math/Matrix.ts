@@ -116,7 +116,7 @@ export class Matrix {
     public static createOrthoMatrix(left: number, right: number, top: number, bottom: number, near: number, far: number): Matrix {
         const xorth = 2 / (right - left);
         const yorth = 2 / (top - bottom);
-        const zorth = -2 / (near - far);
+        const zorth = -2 / (far - near);
 
         const tx = -(left + right) / (left - right);
         const ty = -(bottom + top) / (bottom - top);

@@ -7,7 +7,7 @@ import { Logger, LogLevel } from 'ennj/util/Logger';
 declare const __filename: string;
 const logger = new Logger(LogLevel.INFO, __filename);
 
-export function main<G extends Game>(canvasId: string, game: G, loader: Loader, options: any): void {
+export function main<G extends Game>(canvasId: string, game: G, loader: Loader, options: any): Engine<G> {
     logger.notice('Version ', 'ennj 1.2.0a');
     logger.notice('Agent   ', navigator.userAgent);
     logger.notice('Language', navigator.language);
@@ -22,4 +22,6 @@ export function main<G extends Game>(canvasId: string, game: G, loader: Loader, 
         .catch((err) => {
             logger.critical(err);
         });
+
+    return engine;
 }
