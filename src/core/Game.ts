@@ -1,13 +1,20 @@
-import { Engine } from 'ennj/core/Engine';
-import { Input } from 'ennj/core/Input';
+// import AssetManager from '../asset/AssetManager';
+import Scene from '../scene/Scene';
 
-export abstract class Game {
-    public engine: Engine<this>;
-    public input: Input;
+abstract class Game {
+    // public assets: AssetManager;
 
-    public abstract init(): void;
-    public abstract update(delta: number): void;
-    public abstract draw(gl: WebGLRenderingContext): void;
-    public abstract drawUi(gl: WebGLRenderingContext): void;
-    public abstract destroy(): void;
+    public scene: Scene;
+
+    constructor() {
+        // this.assets = new AssetManager();
+
+        this.scene = new Scene();
+    }
+
+    public abstract onLoad(): Promise<void>;
+
+    public abstract onInit(): void;
 }
+
+export default Game;

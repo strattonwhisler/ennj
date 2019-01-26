@@ -6,11 +6,11 @@ module.exports = {
         __filename: true
     },
     entry: {
-        game: './test/Main.ts'
+        game: './test/main.ts'
     },
     module: {
         rules: [{
-            test: /\.ts?$/,
+            test: /\.ts$/,
             loader: 'ts-loader',
             exclude: /node_modules/,
         }, {

@@ -1,0 +1,9 @@
+{
+    "type": "map",
+    "name": "test",
+
+    "assets": {
+        "ennj://res/cc/autumn-outside.png": { "type": "sheet", "size": 16 }
+    },
+    "layers": []
+}

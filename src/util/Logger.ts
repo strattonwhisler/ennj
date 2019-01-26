@@ -1,95 +1,56 @@
 export enum LogLevel {
     ALL = Number.MAX_VALUE,
-    NONE = -1,
-    TRACE = 6,
-    DEBUG = 5,
-    INFO = 4,
-    NOTICE = 3,
-    WARNING = 2,
-    ERROR = 1,
-    CRITICAL = 0
+    TRACE = 60,
+    DEBUG = 50,
+    INFO = 40,
+    NOTICE = 30,
+    WARNING = 20,
+    ERROR = 10,
+    CRITICAL = 0,
+    NONE = -1
 }
 
-export class Logger {
-    private level: LogLevel;
-    private file: string;
+export default class Logger {
+    private name: string;
 
-    constructor(level: LogLevel = LogLevel.INFO, file: string = null) {
-        this.level = level;
-        this.file = file;
+    constructor(name: string) {
+        this.name = name;
     }
 
-    public setLevel(level: LogLevel) {
-        this.level = level;
+    public log(level: LogLevel, message: any, color: string = '#000000'): void {
+        const time = (new Date).toISOString();
+        const fomattedLevel = LogLevel[level].padEnd(8);
+        const fomattedMessage = typeof message === 'object' ? JSON.stringify(message) : message;
+        console.log(`%c${time} [${this.name}][${fomattedLevel}] ${fomattedMessage}`, `color: ${color};`);
     }
 
-    private getTime(): string {
-        let time = new Date();
-        let text = '';
-
-        text += time.getFullYear().toString().padStart(4, '0') + '-';
-        text += (time.getMonth() + 1).toString().padStart(2, '0') + '-';
-        text += time.getDate().toString().padStart(2, '0') + 'T';
-
-        text += time.getHours().toString().padStart(2, '0') + ':';
-        text += time.getMinutes().toString().padStart(2, '0') + ':';
-        text += time.getSeconds().toString().padStart(2, '0') + '.';
-        text += time.getMilliseconds().toString().padStart(3, '0');
-
-        return text;
+    public trace(message: any): void {
+        this.log(LogLevel.TRACE, message, '#AF00AF');
     }
 
-    public log(level: LogLevel, parts: Array<any>, style: string, fullTrace: boolean = false): void {
-        if(level > this.level) {
-            return;
-        }
-
-        let message = parts.join(' ');
-        let stack = (new Error()).stack;
-
-        let file = this.file;
-        if(!file) {
-            file = stack.split('\n')[3].split('/').pop().split(':').splice(0, 2).join(':').trim();
-        }
-
-        console.log('%c' + this.getTime() + ' [' + LogLevel[level].padEnd(8) + '] [' + file + '] ' + message, style);
-
-        if(fullTrace) {
-            let trace = stack.split('\n');
-            trace.splice(0, 3);
-            for(let row of trace) {
-                console.log('%c    ' + row.trim(), style);
-            }
-        }
+    public debug(message: any): void {
+        this.log(LogLevel.DEBUG, message, '#00AF00');
     }
 
-    public trace(...args: Array<any>): void {
-        this.log(LogLevel.TRACE, args, 'color: #AF00AF;');
+    public info(message: any): void {
+        this.log(LogLevel.INFO, message, '#3F3F3F');
     }
 
-    public debug(...args: Array<any>): void {
-        this.log(LogLevel.DEBUG, args, 'color: #00AF00;');
+    public notice(message: any): void {
+        this.log(LogLevel.NOTICE, message, '#0000AF');
     }
 
-    public info(...args: Array<any>): void {
-        this.log(LogLevel.INFO, args, 'color: #3F3F3F;');
+    public warning(message: any): void {
+        this.log(LogLevel.WARNING, message, '#AFAF00');
     }
 
-    public notice(...args: Array<any>): void {
-        this.log(LogLevel.NOTICE, args, 'color: #0000AF;');
+    public error(message: any): void {
+        this.log(LogLevel.ERROR, message, '#AF0000');
     }
 
-    public warning(...args: Array<any>): void {
-        this.log(LogLevel.WARNING, args, 'color: #AFAF00;');
-    }
-
-    public error(...args: Array<any>): void {
-        this.log(LogLevel.ERROR, args, 'color: #AF0000;', true);
-    }
-
-    public critical(...args: Array<any>): void {
-        this.log(LogLevel.CRITICAL, args, 'color: #AF3F00;', true);
+    public critical(message: any): void {
+        this.log(LogLevel.CRITICAL, message, '#AF3F00');
     }
 }
 
-export default new Logger(LogLevel.ALL);
+export const logger = new Logger('Temp');

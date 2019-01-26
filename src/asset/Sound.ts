@@ -1,29 +1,12 @@
-import { Asset } from 'ennj/asset/Asset';
-import logger from 'ennj/util/Logger';
+import Asset from './Asset';
 
-export class Sound extends Asset {
-    private audio: HTMLAudioElement;
+//Audio
+class Sound extends Asset {
+    public load(): Promise<void> {
+        return null;
+    };
 
-    constructor(url: string, audio: HTMLAudioElement) {
-        super(url);
-
-        this.audio = audio;
-
-        logger.warning('Sound type is unimplemented');
-    }
-
-    static load(url: string): Promise<Sound> {
-        return new Promise<Sound>((resolve, reject) => {
-            const audio = document.createElement('audio');
-            audio.src = url;
-            audio.onload = () => {
-                resolve(new Sound(url, audio));
-            };
-            audio.onerror = () => {
-                const err = `Filed to load sound "${url}"`;
-                logger.error(err);
-                reject(err);
-            };
-        });
-    }
+    protected restore(): void {}
 }
+
+export default Sound;

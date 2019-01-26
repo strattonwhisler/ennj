@@ -1,6 +1,4 @@
-import Logger from '../util/Logger';
-
-const logger = new Logger('Input');
+import logger from 'ennj/util/Logger';
 
 export enum Key {
     // Editing

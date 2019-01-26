@@ -1,7 +1,7 @@
 import Asset from './Asset';
 
-//Image
-class Sheet extends Asset {
+//Font
+class Font extends Asset {
     public load(): Promise<void> {
         return null;
     };
@@ -9,4 +9,4 @@ class Sheet extends Asset {
     protected restore(): void {}
 }
 
-export default Sheet;
+export default Font;

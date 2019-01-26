@@ -1,46 +1,25 @@
-type Component = any;
-
-export class Node {
-    private parent: Node;
-
+class Node {
+    private _parent: Node;
     private children: Array<Node>;
 
-    private components: Array<Component>
-
-    constructor() {
+    constructor(parent: Node = null) {
+        this._parent = parent;
         this.children = [];
-    }
-
-    public update(delta: number): void {
-        for(const component of this.components) {
-
-        }
-
-        for(const child of this.children) {
-            child.update(delta);
-        }
-    }
-
-    public draw(gl: WebGLRenderingContext): void {
-        // Draw self
-        for(const child of this.children) {
-            child.draw(gl);
-        }
     }
 
     public attachChild(child: Node): void {
         this.children.push(child);
+        child._parent = this;
     }
 
     public detachChild(child: Node): void {
-        this.children.splice(this.children.indexOf(child), 1);
+        this.children.splice(this.children.indexOf(child));
+        child._parent = null;
     }
 
-    public attachComponent(component: Component): void {
-        this.components.push(component);
-    }
-
-    public detachComponent(component: Component): void {
-
+    public get parent(): Node {
+        return this._parent;
     }
 }
+
+export default Node;

@@ -1,124 +1,191 @@
-import { uuid, uuidv4 } from 'ennj/util/UUID';
-import { Asset } from 'ennj/asset/Asset';
-import { Image } from 'ennj/asset/Image';
-import { Sheet } from 'ennj/asset/Sheet';
-import { Sound } from 'ennj/asset/Sound';
-import { Music } from 'ennj/asset/Music';
-import { Json } from 'ennj/asset/Json';
-import logger from 'ennj/util/Logger';
+import Asset from './Asset';
+import Sprite from './Sprite';
+import Sheet from './Sheet';
+import Sound from './Sound';
+import Level from './Level';
+import Prefab from './Prefab';
+import Font from './Font';
+import Logger from '../util/Logger';
 
-export class Loader {
-    public readonly id: uuid = uuidv4();
+const logger = new Logger('Loader');
 
-    private static cache: {[url: string]: {loaders: Array<uuid>, asset: Asset}} = {};
+/**
+ * Valid asset types
+ */
+type AssetType = 'sprite' | 'sheet' | 'sound' | 'level' | 'prefab' | 'font';
 
-    private queued: number = 0;
-    private loaded: number = 0;
-    private queue: Array<{type: string, url: string}> = [];
+/**
+ * Represents a queue item
+ */
+class QueueItem {
+    /**
+     * Creates a queue items
+     * @constructor
+     * @param type Type of asset
+     * @param url URL of asset
+     */
+    constructor(
+        public type: AssetType,
+        public url: string
+    ) {}
+}
 
-    private cacheAsset(asset: Asset): void {
-        logger.trace(`Caching asset "${asset.url}"`);
-        Loader.cache[asset.url] = {
-            loaders: [this.id],
-            asset
-        };
+/**
+ * Class for loading assets
+ */
+class Loader {
+    /**
+     * Asset queue
+     */
+    private queue: Array<QueueItem>;
+
+    /**
+     * Number of assets loaded by this loader
+     */
+    private loaded: number;
+
+    /**
+     * Creates a new loader
+     * @constructor
+     */
+    constructor() {
+        this.queue = new Array<QueueItem>();
+
+        this.loaded = 0;
     }
 
-    private async loadAsset(asset: {type: string, url: string}): Promise<Asset> {
-        if(Loader.cache[asset.url]) {
-            logger.trace(`Loading asset from cache "${asset.url}"`);
-            Loader.cache[asset.url].loaders.push(this.id);
-            return Loader.cache[asset.url].asset;
-        }
-
-        switch(asset.type) {
-            case 'image':
-                return Image.load(asset.url);
-            case 'sheet':
-                return Sheet.load(asset.url);
-            case 'sound':
-                return Sound.load(asset.url);
-            case 'music':
-                return Music.load(asset.url);
-            case 'json':
-                return Json.load(asset.url);
-            default:
-                const err = `Unknown asset type "${asset.type}" for "${asset.url}"`;
-                logger.error(err);
-                throw Error(err);
-        }
+    /**
+     * Adds an asset to the queue
+     * @param type The type of the asset
+     * @param url The url of the asset
+     */
+    private add(type: AssetType, url: string): void {
+        this.queue.push(new QueueItem(type, url));
     }
 
-    public async load(): Promise<Asset[]> {
-        logger.trace(`Loading assets for loader "${this.id}"`);
-        return Promise.all(this.queue.map(async (asset) => {
-            const data = this.loadAsset(asset);
-            this.cacheAsset(await data);
-            this.loaded++;
-            return data;
-        }));
+    /**
+     * Adds a sprite to the queue
+     * @param url The url of the asset
+     */
+    public addSprite(url: string): void {
+        this.add('sprite', url);
     }
 
-    public unload(): void {
-        logger.trace(`Unloading assets for loader "${this.id}"`);
-        for(let asset of this.queue) {
-            const cached = Loader.cache[asset.url];
-            if(cached) {
-                if(cached.loaders.length === 1) {
-                    logger.trace(`Uncacheing asset "${asset.url}"`);
-                    delete Loader.cache[asset.url];
-                } else {
-                    logger.trace(`Unloading asset "${asset.url}"\n    ${cached.loaders.length - 1} refs left`);
-                    cached.loaders.splice(cached.loaders.indexOf(this.id), 1);
-                }
-            }
-        }
-    }
-
-    private addAsset(type: string, url: string): void {
-        this.queue.push({ type, url });
-        this.queued++;
-    }
-
-    public addBatch(list: {[type: string]: Array<string>}): void {
-        for(let type in list) {
-            for(let url of list[type]) {
-                this.addAsset(type, url);
-            }
-        }
-    }
-
-    public addImage(url: string): void {
-        this.addAsset('image', url);
-    }
-
+    /**
+     * Adds a sheet to the queue
+     * @param url The url of the asset
+     */
     public addSheet(url: string): void {
-        this.addAsset('sheet', url);
+        this.add('sheet', url);
     }
 
+    /**
+     * Adds a sound to the queue
+     * @param url The url of the asset
+     */
     public addSound(url: string): void {
-        this.addAsset('sound', url);
+        this.add('sound', url);
     }
 
-    public addMusic(url: string): void {
-        this.addAsset('music', url);
+    /**
+     * Adds a level to the queue
+     * @param url The url of the asset
+     */
+    public addlevel(url: string): void {
+        this.add('level', url);
     }
 
-    public addJson(url: string): void {
-        this.addAsset('json', url);
+    /**
+     * Adds a prefab to the queue
+     * @param url The url of the asset
+     */
+    public addPrefab(url: string): void {
+        this.add('prefab', url);
     }
 
-    get progress(): number {
-        return this.loaded / this.queued;
+    /**
+     * Adds a font to the queue
+     * @param url The url of the asset
+     */
+    public addFont(url: string): void {
+        this.add('font', url);
     }
 
-    static getCachedAsset(url: string): Asset {
-        logger.trace(`Fetching asset "${url}"`);
-        if(Loader.cache[url]) {
-            return Loader.cache[url].asset;
-        } else {
-            logger.error(`Attempted to get unloaded asset "${url}"`);
-            return null;
-        }
+    /**
+     * Loads an individual asset
+     * @param item The item to load
+     */
+    private loadAsset(item: QueueItem): Promise<Asset> {
+        return new Promise<Asset>((resolve, reject) => {
+            let asset: Asset;
+
+            switch(item.type) {
+                case 'sprite':
+                    asset = new Sprite(item.url);
+                    break;
+                case 'sheet':
+                    asset = new Sheet(item.url);
+                    break;
+                case 'sound':
+                    asset = new Sound(item.url);
+                    break;
+                case 'level':
+                    asset = new Level(item.url);
+                    break;
+                case 'prefab':
+                    asset = new Prefab(item.url);
+                    break;
+                case 'font':
+                    asset = new Font(item.url);
+                    break;
+            }
+
+            if(asset.isLoaded) {
+                resolve(asset);
+                return;
+            }
+
+            asset.load()
+                .then(() => {
+                    logger.debug(`Loaded ${item.type} '${item.url}'`);
+                    resolve(asset);
+                })
+                .catch((error) => {
+                    logger.error(`Failed to load ${item.type} '${item.url}'`);
+                    reject(error);
+                });
+        });
+    }
+
+    /**
+     * Loads all items in the queue
+     */
+    public load(): Promise<void> {
+        logger.debug(`Load started`);
+        const queued = this.queue.length;
+
+        return new Promise<void>((resolve, reject) => {
+            const success = (asset: any) => {
+                this.loaded++;
+                if(this.loaded == queued) {
+                    resolve();
+                }
+            };
+
+            const failure = (error: any) => {
+                this.loaded++;
+            };
+
+            for(const item of this.queue) {
+                this.loadAsset(item)
+                    .then(success)
+                    .catch(failure);
+            }
+        })
+            .then(() => {
+                logger.debug(`Load done`);
+            });
     }
 }
+
+export default Loader;

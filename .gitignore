@@ -1,2 +1,5 @@
 dist/
 node_modules/
+
+# Contains copyright content
+res/cc/
