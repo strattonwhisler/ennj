@@ -1,0 +1,19 @@
+body {
+    margin: 0;
+    height: 100vh;
+    background-color: black;
+}
+.center {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.controls {
+    position: absolute;
+    margin: 1rem;
+}
+.controls > * {
+    margin-right: 0.5em;
+}
