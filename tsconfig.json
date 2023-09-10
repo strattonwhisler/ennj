@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
+    "outDir": "dist",
     "target": "es6",
-    "module": "es6",
+    "module": "system",
     "moduleResolution": "node",
     "lib": ["esnext", "dom"],
     "strict": true,
@@ -9,10 +10,15 @@
     "emitDecoratorMetadata": true,
     "noEmitHelpers": true,
     "importHelpers": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "allowArbitraryExtensions": true
   },
+  "compileOnSave": false,
   "exclude": [
     "node_modules",
     ".old"
+  ],
+  "include": [
+    "ennj"
   ]
 }
